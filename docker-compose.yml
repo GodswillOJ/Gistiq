@@ -1,0 +1,41 @@
+services:
+  api:
+    build:
+      context: ./apps/api
+
+    ports:
+      - "5000:8080"
+
+    depends_on:
+      - postgres
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+
+      # DATABASE
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=news_platform;Username=postgres;Password=postgres
+
+      # JWT
+      JwtSettings__Secret: SUPER_ULTRA_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION_123456789
+      JwtSettings__Issuer: AfroCryMedia
+      JwtSettings__Audience: AfroCryUsers
+      JwtSettings__ExpiryMinutes: 60
+
+  postgres:
+    image: postgres:16
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: news_platform
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
