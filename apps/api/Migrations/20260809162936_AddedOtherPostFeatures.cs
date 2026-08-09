@@ -11,13 +11,16 @@ namespace api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "Status",
-                table: "Posts",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            migrationBuilder.Sql("""
+                ALTER TABLE "Posts"
+                ALTER COLUMN "Status" TYPE integer
+                USING CASE
+                    WHEN LOWER("Status") = 'draft' THEN 0
+                    WHEN LOWER("Status") = 'published' THEN 1
+                    WHEN LOWER("Status") = 'archived' THEN 2
+                    ELSE 0
+                END;
+            """);
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "PublishedAt",
