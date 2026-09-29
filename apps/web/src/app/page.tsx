@@ -3,6 +3,7 @@ import HeroMobileSlider from "@/src/components/hero/HeroMobileSlider";
 import Categories from "@/src/components/category/Categories";
 import LatestArticles from "@/src/features/posts/components/LatestArticles";
 import  Navbar from "@/src/components/navbar/Navbar";
+import Footer from "@/src/components/footer/Footer";
 
 export default function HomePage() {
   return (
@@ -22,6 +23,9 @@ export default function HomePage() {
       <section>
         <LatestArticles />
       </section>
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }
