@@ -20,7 +20,7 @@ type BlockType =
 
 interface EditorBlock {
   id: number;
-  type: BlockType;
+  type: "heading" | "paragraph" | "image";
   content: string;
 }
 
@@ -132,21 +132,18 @@ export default function PostEditor() {
     =========================
   */
 
-  const updateBlock = (
-    id: number,
-    value: string
-  ) => {
-    setBlocks((prev) =>
-      prev.map((block) =>
-        block.id === id
-          ? {
-              ...block,
-              content: value,
-            }
-          : block
-      )
-    );
-  };
+const updateBlock = (id: number, value: string) => {
+  setBlocks((prev) =>
+    prev.map((block) =>
+      block.id === id
+        ? {
+            ...block,
+            content: value,
+          }
+        : block
+    )
+  );
+};
 
   /*
     =========================
@@ -173,9 +170,7 @@ export default function PostEditor() {
 
   const removeBlock = (id: number) => {
     setBlocks((prev) =>
-      prev.filter(
-        (block) => block.id !== id
-      )
+      prev.filter((block) => block.id !== id)
     );
   };
 
@@ -210,7 +205,10 @@ export default function PostEditor() {
       excerpt,
       featuredImage,
       category,
-      contentBlocks: blocks as ContentBlock[],
+      contentBlocks: blocks.map((block) => ({
+        ...block,
+        id: String(block.id),
+      })),
       seoTitle: seoTitle || title,
       seoDescription: seoDescription || excerpt,
       tags: tags
