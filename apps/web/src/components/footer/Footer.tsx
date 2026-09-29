@@ -19,7 +19,7 @@ export default function Footer() {
           {/* Brand / Description */}
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-              Your News
+              AfroCry Media
             </h2>
 
             <p className="mt-4 max-w-md text-sm leading-6 text-gray-600">
@@ -174,7 +174,7 @@ export default function Footer() {
             <span className="hidden text-gray-300 sm:inline">|</span>
 
             <span>
-              Website made by{" "}
+              Created by{" "}
               <span className="font-medium text-gray-900">
                 Godswill Ogono
               </span>
@@ -183,14 +183,14 @@ export default function Footer() {
         </div>
 
         {/* Email */}
-        <div className="mt-4 text-center text-sm text-gray-500">
+        {/* <div className="mt-4 text-center text-sm text-gray-500">
           <a
             href="mailto:godswill.ogono@gmail.com"
             className="transition hover:text-gray-900"
           >
             godswill.ogono@gmail.com
           </a>
-        </div>
+        </div> */}
       </div>
     </footer>
   );
