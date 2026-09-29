@@ -193,6 +193,7 @@ const updateBlock = (id: number, value: string) => {
     SUBMIT
     =========================
   */
+ /* New fix */
 
   const handleSubmit = async () => {
     try {
