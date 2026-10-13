@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using api.Modules.Auth.Services;
+using DotNetEnv;
+
+// Load local environment variables
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +43,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         });
 });
 
+
 builder.Services.AddCors(options =>
 {
+    var allowedOrigins = (
+        Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+        ?? "http://localhost:3000"
+    ).Split(
+        ',',
+        StringSplitOptions.RemoveEmptyEntries |
+        StringSplitOptions.TrimEntries
+    );
+
     options.AddPolicy("AllowWebApp", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
