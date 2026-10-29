@@ -119,21 +119,18 @@ export default function DashboardHome() {
           }
         );
 
-        const body = await res.text();
-
-        console.log("Auth check status:", res.status);
-        console.log("Auth check response:", body);
-
         if (!res.ok) {
           router.replace("/login");
           return;
         }
 
-        const user = JSON.parse(body);
+        const user = await res.json();
 
-        if (user.role?.toLowerCase() !== "admin") {
-          router.replace("/login");
+        if (user.role?.toLowerCase() === "admin") {
+          return; // Allow access to the dashboard
         }
+
+        router.replace("/login"); // Not an admin
       } catch (error) {
         console.error("Auth check failed:", error);
         router.replace("/login");
