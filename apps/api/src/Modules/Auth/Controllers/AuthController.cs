@@ -10,32 +10,41 @@ namespace api.src.Modules.Auth.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+
 public class AuthController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly JwtTokenService _jwtTokenService;
 
+    private readonly IWebHostEnvironment _environment;
+    
     public AuthController(
         ApplicationDbContext db,
-        JwtTokenService jwtTokenService
+        JwtTokenService jwtTokenService,
+        IWebHostEnvironment environment
     )
     {
         _db = db;
         _jwtTokenService = jwtTokenService;
+        _environment = environment;
     }
+
 
     private void SetAuthCookie(string token)
     {
+        var isProduction = _environment.IsProduction();
+
         Response.Cookies.Append("token", token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false, // set false only in localhost if needed
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddMinutes(60),
+            Secure = isProduction,
+            SameSite = isProduction
+                ? SameSiteMode.None
+                : SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddMinutes(60),
             Path = "/"
         });
     }
-
     [HttpPost("register")]
     public async Task<ActionResult> Register(RegisterUserDto dto)
     {

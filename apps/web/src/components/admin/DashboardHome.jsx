@@ -108,27 +108,41 @@ export default function DashboardHome() {
   });
   const router = useRouter();
 
-    useEffect(() => {
-      const checkAuth = async () => {
-        try {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-            {
-              credentials: "include",
-            }
-          );
-
-          if (!res.ok) {
-            router.push("/login");
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          {
+            credentials: "include",
+            cache: "no-store",
           }
-        } catch {
-          router.push("/login");
+        );
+
+        const body = await res.text();
+
+        console.log("Auth check status:", res.status);
+        console.log("Auth check response:", body);
+
+        if (!res.ok) {
+          router.replace("/login");
+          return;
         }
-      };
 
-      checkAuth();
-    }, [router]);
+        const user = JSON.parse(body);
 
+        if (user.role?.toLowerCase() !== "admin") {
+          router.replace("/login");
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+  
   return (
     <div className="space-y-8">
 
