@@ -18,7 +18,8 @@ export function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith("/admin");
 
   const isAuthPage =
-    pathname === "/login" || pathname === "/register";
+    pathname === "/login" ||
+    pathname === "/register";
 
   const publicRoutes = [
     "/",
@@ -27,13 +28,14 @@ export function middleware(request: NextRequest) {
     "/contact",
   ];
 
-  const isPublic = publicRoutes.some((route) =>
-    route === "/"
-      ? pathname === "/"
-      : pathname === route || pathname.startsWith(`${route}/`)
+  const isPublic = publicRoutes.some(
+    (route) =>
+      route === "/"
+        ? pathname === "/"
+        : pathname === route || pathname.startsWith(`${route}/`)
   );
 
-  // NO TOKEN
+  // Allow login and registration pages without a token.
   if (!token) {
     if (isAdminLogin || isAuthPage || isPublic) {
       return NextResponse.next();
@@ -52,7 +54,6 @@ export function middleware(request: NextRequest) {
 
   let decoded: TokenPayload;
 
-  // VALIDATE TOKEN EXPIRY
   try {
     decoded = jwtDecode<TokenPayload>(token);
 
@@ -60,17 +61,7 @@ export function middleware(request: NextRequest) {
       throw new Error("Token expired or missing expiry");
     }
   } catch {
-    const response =
-      isAdminRoute && !isAdminLogin
-        ? NextResponse.redirect(
-            new URL("/admin/login", request.url)
-          )
-        : isAuthPage || isAdminLogin || isPublic
-          ? NextResponse.next()
-          : NextResponse.redirect(
-              new URL("/login", request.url)
-            );
-
+    const response = NextResponse.next();
     response.cookies.delete("token");
     return response;
   }
@@ -81,27 +72,23 @@ export function middleware(request: NextRequest) {
       "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     ];
 
-  const isAdmin = role?.toLowerCase() === "admin";
-
-  // ADMIN LOGIN
-  if (isAdminLogin && isAdmin) {
+  // Admin login page: send an existing admin to the dashboard.
+  if (isAdminLogin && role === "Admin") {
     return NextResponse.redirect(
       new URL("/admin/dashboard", request.url)
     );
   }
 
-  // ADMIN PROTECTION
-  if (isAdminRoute && !isAdmin) {
+  // Admin routes require the Admin role.
+  if (isAdminRoute && role !== "Admin") {
     return NextResponse.redirect(
       new URL("/", request.url)
     );
   }
 
-  // NORMAL LOGIN/REGISTER PROTECTION
+  // Prevent logged-in users from revisiting normal login pages.
   if (isAuthPage) {
-    return NextResponse.redirect(
-      new URL("/", request.url)
-    );
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
