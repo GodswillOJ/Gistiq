@@ -13,12 +13,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const token = request.cookies.get("token")?.value;
+  const isAdminLogin = pathname === "/admin/login";
   const isAdminRoute = pathname.startsWith("/admin");
-  const isAdminLogin = pathname.startsWith("/admin/login");
 
   const isAuthPage =
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register");
+    pathname === "/login" ||
+    pathname === "/register";
 
   const publicRoutes = [
     "/",
@@ -27,14 +27,22 @@ export function middleware(request: NextRequest) {
     "/contact"
   ];
 
-  const isPublic = publicRoutes.some((r) =>
-    pathname.startsWith(r)
+  const isPublic = publicRoutes.some(
+    (route) =>
+      route === "/"
+        ? pathname === "/"
+        : pathname === route || pathname.startsWith(`${route}/`)
   );
+
 
   // =========================
   // NO TOKEN
   // =========================
   if (!token) {
+    if (isAdminLogin || isAuthPage || isPublic) {
+      return NextResponse.next();
+    }
+
     if (isAdminRoute) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
@@ -53,18 +61,16 @@ export function middleware(request: NextRequest) {
   try {
     const decoded = jwtDecode<TokenPayload>(token);
 
-    const role =
-      decoded.role ??
-      decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-
-    const currentTime = Date.now() / 1000;
-
     // expired token
-    if (decoded.exp < currentTime) {
-      const res = NextResponse.redirect(new URL("/login", request.url));
-      res.cookies.delete("token");
-      return res;
+    if (decoded.exp || decoded.exp <= Date.now() / 1000) {
+      throw new Error("Token expired or missing expiry");
     }
+
+    const role =
+    decoded.role ??
+    decoded[
+      "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+    ];
 
     // =========================
     // ADMIN PROTECTION
