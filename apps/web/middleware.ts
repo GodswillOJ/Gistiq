@@ -1,106 +1,114 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
 type TokenPayload = {
-  sub: string;
-  email: string;
-  exp: number;
+  sub?: string;
+  email?: string;
+  exp?: number;
   role?: string;
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string;
 };
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const token = request.cookies.get("token")?.value;
+
   const isAdminLogin = pathname === "/admin/login";
   const isAdminRoute = pathname.startsWith("/admin");
 
   const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/register";
+    pathname === "/login" || pathname === "/register";
 
   const publicRoutes = [
     "/",
     "/news",
     "/category",
-    "/contact"
+    "/contact",
   ];
 
-  const isPublic = publicRoutes.some(
-    (route) =>
-      route === "/"
-        ? pathname === "/"
-        : pathname === route || pathname.startsWith(`${route}/`)
+  const isPublic = publicRoutes.some((route) =>
+    route === "/"
+      ? pathname === "/"
+      : pathname === route || pathname.startsWith(`${route}/`)
   );
 
-
-  // =========================
   // NO TOKEN
-  // =========================
   if (!token) {
     if (isAdminLogin || isAuthPage || isPublic) {
       return NextResponse.next();
     }
 
     if (isAdminRoute) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return NextResponse.redirect(
+        new URL("/admin/login", request.url)
+      );
     }
 
-    if (isAuthPage) {
-      return NextResponse.next();
-    }
-
-    if (isPublic) {
-      return NextResponse.next();
-    }
-
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(
+      new URL("/login", request.url)
+    );
   }
 
-  try {
-    const decoded = jwtDecode<TokenPayload>(token);
+  let decoded: TokenPayload;
 
-    // expired token
-    if (decoded.exp || decoded.exp <= Date.now() / 1000) {
+  // VALIDATE TOKEN EXPIRY
+  try {
+    decoded = jwtDecode<TokenPayload>(token);
+
+    if (!decoded.exp || decoded.exp <= Date.now() / 1000) {
       throw new Error("Token expired or missing expiry");
     }
+  } catch {
+    const response =
+      isAdminRoute && !isAdminLogin
+        ? NextResponse.redirect(
+            new URL("/admin/login", request.url)
+          )
+        : isAuthPage || isAdminLogin || isPublic
+          ? NextResponse.next()
+          : NextResponse.redirect(
+              new URL("/login", request.url)
+            );
 
-    const role =
+    response.cookies.delete("token");
+    return response;
+  }
+
+  const role =
     decoded.role ??
     decoded[
       "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     ];
 
-    // =========================
-    // ADMIN PROTECTION
-    // =========================
-    if (isAdminRoute && role !== "Admin") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  const isAdmin = role?.toLowerCase() === "admin";
 
-    // =========================
-    // ADMIN LOGIN BLOCK IF ALREADY ADMIN
-    // =========================
-    if (isAdminLogin && role === "Admin") {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-    }
-
-    // =========================
-    // BLOCK LOGIN/REGISTER IF LOGGED IN
-    // =========================
-    if (isAuthPage && token) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    return NextResponse.next();
-  } catch {
-    const res = NextResponse.redirect(new URL("/login", request.url));
-    res.cookies.delete("token");
-    return res;
+  // ADMIN LOGIN
+  if (isAdminLogin && isAdmin) {
+    return NextResponse.redirect(
+      new URL("/admin/dashboard", request.url)
+    );
   }
+
+  // ADMIN PROTECTION
+  if (isAdminRoute && !isAdmin) {
+    return NextResponse.redirect(
+      new URL("/", request.url)
+    );
+  }
+
+  // NORMAL LOGIN/REGISTER PROTECTION
+  if (isAuthPage) {
+    return NextResponse.redirect(
+      new URL("/", request.url)
+    );
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
