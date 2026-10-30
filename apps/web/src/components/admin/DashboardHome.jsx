@@ -120,7 +120,7 @@ export default function DashboardHome() {
         );
 
         if (!res.ok) {
-          router.replace("/login");
+          router.replace("/admin/login");
           return;
         }
 
@@ -130,7 +130,7 @@ export default function DashboardHome() {
           return; // Allow access to the dashboard
         }
 
-        router.replace("/login"); // Not an admin
+        router.replace("/admin/login");
       } catch (error) {
         console.error("Auth check failed:", error);
         router.replace("/login");
@@ -139,7 +139,7 @@ export default function DashboardHome() {
 
     checkAuth();
   }, [router]);
-  
+
   return (
     <div className="space-y-8">
 

@@ -228,7 +228,7 @@ public class AuthController : ControllerBase
     }
 
     // Additional admin endpoints 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpGet("me")]
     public async Task<ActionResult> Me()
     {
