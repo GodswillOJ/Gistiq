@@ -1,46 +1,43 @@
+
 import axios from "axios";
 import type { RegisterData, LoginData } from "../types/auth.types";
-import { CreatePostPayload } from "../types/post.types";
+import type { CreatePostPayload } from "../types/post.types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
+
 const config = {
-  withCredentials: true // 
+  withCredentials: true,
 };
 
 export const registerUser = (data: RegisterData) => {
-  return axios.post(`${API}/auth/register`, data, config );
+  return axios.post(`${API}/auth/register`, data, config);
 };
 
 export const loginUser = (data: LoginData) => {
   return axios.post(`${API}/auth/login`, data, config);
 };
 
+// Admin login now goes through Next.js
 export const adminLogin = (data: LoginData) => {
-  return axios.post(`${API}/auth/admin/login`, data, config);
+  return axios.post("/api/auth/admin/login", data);
 };
 
-// posts handler
+export const logoutUser = () => {
+  return axios.post("/api/auth/logout");
+};
+
+// Existing post functions remain unchanged
 export const createPost = async (data: CreatePostPayload) => {
-  return axios.post(`${API}/posts`, data, config );
+  return axios.post(`${API}/posts`, data, config);
 };
 
 export const getPosts = async () => {
-  const response =
-    await axios.get(
-      `${API}/posts`
-    );
-
+  const response = await axios.get(`${API}/posts`);
   return response.data;
 };
 
-export const getPost = async (
-  id: string
-) => {
-  const response =
-    await axios.get(
-      `${API}/posts/${id}`
-    );
-
+export const getPost = async (id: string) => {
+  const response = await axios.get(`${API}/posts/${id}`);
   return response.data;
 };
 
@@ -57,23 +54,16 @@ export const updatePost = async (
   return response.data;
 };
 
-export const deletePost = async (
-  id: string
-) => {
-  const response =
-    await axios.delete(
-      `${API}/posts/${id}`,
-      config
-    );
+export const deletePost = async (id: string) => {
+  const response = await axios.delete(
+    `${API}/posts/${id}`,
+    config
+  );
 
   return response.data;
 };
 
-// getting posts by slug
 export const getPostBySlug = async (slug: string) => {
-  console.log("API VALUE:", API);
-  console.log("FULL URL:", `${API}/posts/slug/${slug}`);
-
   const response = await axios.get(
     `${API}/posts/slug/${slug}`
   );

@@ -111,13 +111,10 @@ export default function DashboardHome() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-          {
-            credentials: "include",
-            cache: "no-store",
-          }
-        );
+        const res = await fetch("/api/auth/me", {
+          method: "GET",
+          cache: "no-store",
+        });
 
         if (!res.ok) {
           router.replace("/admin/login");
@@ -126,20 +123,19 @@ export default function DashboardHome() {
 
         const user = await res.json();
 
-        if (user.role?.toLowerCase() === "admin") {
-          return; // Allow access to the dashboard
+        if (user.role?.toLowerCase() !== "admin") {
+          router.replace("/admin/login");
         }
-
-        router.replace("/admin/login");
       } catch (error) {
         console.error("Auth check failed:", error);
-        router.replace("/login");
+        router.replace("/admin/login");
       }
     };
 
     checkAuth();
   }, [router]);
 
+  
   return (
     <div className="space-y-8">
 

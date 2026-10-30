@@ -1,58 +1,57 @@
+
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import type { User } from "../types/auth.types";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-    const fetchMe = useCallback(async () => {
+  // Reusable authentication check
+  const fetchMe = useCallback(async () => {
     try {
-        const res = await axios.get(`${API}/auth/me`, {
-        withCredentials: true,
-        });
+      const res = await axios.get("/api/auth/me");
 
-        setUser(res.data);
+      setUser(res.data);
+      return res.data;
     } catch {
-        setUser(null);
+      setUser(null);
+      return null;
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    }, []);
+  }, []);
 
-    useEffect(() => {
-    let mounted = true;
+  // Initial authentication check
+  useEffect(() => {
+    let active = true;
 
-    async function loadUser() {
-        try {
-        const res = await axios.get(`${API}/auth/me`, {
-            withCredentials: true,
-        });
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get("/api/auth/me");
 
-        if (mounted) {
-            setUser(res.data);
+        if (active) {
+          setUser(res.data);
         }
-        } catch {
-        if (mounted) {
-            setUser(null);
+      } catch {
+        if (active) {
+          setUser(null);
         }
-        } finally {
-        if (mounted) {
-            setLoading(false);
+      } finally {
+        if (active) {
+          setLoading(false);
         }
-        }
-    }
+      }
+    };
 
-    loadUser();
+    checkAuth();
 
     return () => {
-        mounted = false;
+      active = false;
     };
-    }, []);
+  }, []);
 
   return {
     user,
