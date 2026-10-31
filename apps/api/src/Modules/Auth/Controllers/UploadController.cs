@@ -1,8 +1,7 @@
-using api.Modules.Posts.DTOs;
+
+using api.Modules.Auth.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using api.Modules.Auth.Services;
-using api.Modules.Posts.Entities;
 
 namespace api.Modules.Posts.Controllers;
 
@@ -11,22 +10,25 @@ namespace api.Modules.Posts.Controllers;
 public class UploadController : ControllerBase
 {
     private readonly CloudinaryService _cloudinary;
+    private readonly ILogger<UploadController> _logger;
 
     public UploadController(
-        CloudinaryService cloudinary)
+        CloudinaryService cloudinary,
+        ILogger<UploadController> logger)
     {
         _cloudinary = cloudinary;
+        _logger = logger;
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Upload(IFormFile file)
+    public async Task<IActionResult> Upload([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest(new
             {
-                message = "Please select a valid image."
+                message = "No valid image file was received."
             });
         }
 
@@ -41,11 +43,17 @@ public class UploadController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Cloudinary upload failed: {ex}");
+            _logger.LogError(
+                ex,
+                "Image upload failed. File: {FileName}, Size: {FileSize}",
+                file.FileName,
+                file.Length
+            );
 
             return StatusCode(500, new
             {
-                message = "Image upload failed on the server."
+                message = "Image upload failed.",
+                error = ex.Message
             });
         }
     }
