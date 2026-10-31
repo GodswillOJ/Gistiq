@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
-import { logoutUser } from "@/src/features/auth/services/upload.service";
+import { logoutUser } from "@/src/features/auth/services/auth.service";
 
 const menu = [
   {
