@@ -1,10 +1,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+const API = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Get the authentication token from the HttpOnly cookie
     const token = request.cookies.get("token")?.value;
 
     if (!token) {
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 2. Check backend configuration
     if (!API) {
       console.error("NEXT_PUBLIC_API_URL is missing");
 
@@ -23,11 +25,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Read and validate the uploaded file
     const formData = await request.formData();
-
     const file = formData.get("file");
 
-    if (!(file instanceof File)) {
+    if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json(
         { message: "No valid image file was received." },
         { status: 400 }
@@ -35,8 +37,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Uploading file:", file.name);
+    console.log("File size:", file.size);
     console.log("Backend URL:", `${API}/uploads`);
 
+    // 4. Forward the upload to the ASP.NET Core backend
     const response = await fetch(`${API}/uploads`, {
       method: "POST",
       headers: {
@@ -46,12 +50,21 @@ export async function POST(request: NextRequest) {
       cache: "no-store",
     });
 
+    // 5. Read the backend response
     const responseBody = await response.text();
 
     console.log("Backend upload status:", response.status);
-    console.log("Backend upload response:", responseBody);
 
-    return new NextResponse(responseBody, {
+    if (!response.ok) {
+      console.error(
+        "Backend upload failed:",
+        response.status,
+        responseBody || "Empty response body"
+      );
+    }
+
+    // 6. Return the backend response to the frontend
+    return new NextResponse(responseBody || null, {
       status: response.status,
       headers: {
         "Content-Type":
