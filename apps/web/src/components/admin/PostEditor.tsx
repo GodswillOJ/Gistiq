@@ -207,8 +207,8 @@ const updateBlock = (id: number, value: string) => {
       featuredImage,
       category,
       contentBlocks: blocks.map((block) => ({
-        ...block,
-        id: String(block.id),
+          type: block.type,
+          content: block.content,
       })),
       seoTitle: seoTitle || title,
       seoDescription: seoDescription || excerpt,

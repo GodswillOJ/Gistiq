@@ -25,6 +25,10 @@ builder.Services
     {
         options.JsonSerializerOptions.ReferenceHandler =
             ReferenceHandler.IgnoreCycles;
+
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
     });
 
 builder.Services.AddEndpointsApiExplorer();
