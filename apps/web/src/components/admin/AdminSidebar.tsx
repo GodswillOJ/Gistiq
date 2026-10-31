@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { logoutUser } from "../../features/auth/services/auth.service.ts";
 
 const menu = [
   {
@@ -70,20 +70,24 @@ const menu = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [openDropdown, setOpenDropdown] =
     useState("Posts");
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
+    const confirmLogout = window.confirm(
+      "Are you sure you want to logout?"
+    );
+
     if (!confirmLogout) return;
 
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    router.push("/login");
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Force a fresh request after clearing the cookie.
+      window.location.replace("/admin/login");
+    }
   };
 
   return (

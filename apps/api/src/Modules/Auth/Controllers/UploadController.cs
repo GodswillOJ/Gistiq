@@ -20,17 +20,33 @@ public class UploadController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Upload(
-        IFormFile file)
+    public async Task<IActionResult> Upload(IFormFile file)
     {
-        var url =
-            await _cloudinary.UploadImageAsync(
-                file
-            );
-
-        return Ok(new
+        if (file == null || file.Length == 0)
         {
-            imageUrl = url
-        });
+            return BadRequest(new
+            {
+                message = "Please select a valid image."
+            });
+        }
+
+        try
+        {
+            var url = await _cloudinary.UploadImageAsync(file);
+
+            return Ok(new
+            {
+                imageUrl = url
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Cloudinary upload failed: {ex}");
+
+            return StatusCode(500, new
+            {
+                message = "Image upload failed on the server."
+            });
+        }
     }
 }
