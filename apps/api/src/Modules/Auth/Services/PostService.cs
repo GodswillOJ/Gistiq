@@ -17,6 +17,14 @@ public class PostService : IPostService
 
     public async Task<Post> CreatePostAsync(CreatePostDto dto, ClaimsPrincipal user)
     {
+        if (dto.BreakingDurationHours.HasValue &&
+            !new[] { 2, 4, 12, 24 }.Contains(dto.BreakingDurationHours.Value))
+        {
+            throw new ArgumentException(
+                "Breaking duration must be 2, 4, 12, or 24 hours."
+            );
+        }
+
         var userEmail = user.FindFirst(ClaimTypes.Email)?.Value;
         var role = user.FindFirst(ClaimTypes.Role)?.Value;
 
@@ -42,6 +50,12 @@ public class PostService : IPostService
             IsFeatured = dto.IsFeatured,
             IsTrending = dto.IsTrending,
             IsBreaking = dto.IsBreaking,
+
+            BreakingUntil = dto.IsBreaking
+                ? DateTime.UtcNow.AddHours(
+                    dto.BreakingDurationHours ?? 4
+                )
+                : null,
 
             ContentBlocks = dto.ContentBlocks.Select(x => new ContentBlock
             {
@@ -69,17 +83,21 @@ public class PostService : IPostService
 
     public async Task<List<Post>> GetTrendingPostsAsync()
     {
+        var now = DateTime.UtcNow;
+
         return await _context.Posts
             .Include(p => p.ContentBlocks)
             .Where(p => p.Status == PostStatus.Published)
-            .OrderByDescending(p => p.IsBreaking)
+            .OrderByDescending(p =>
+                p.IsBreaking &&
+                p.BreakingUntil.HasValue &&
+                p.BreakingUntil.Value > now)
             .ThenByDescending(p => p.IsTrending)
             .ThenByDescending(p => p.Views)
             .ThenByDescending(p => p.PublishedAt)
             .Take(5)
             .ToListAsync();
     }
-
     public async Task<List<Post>> GetFeaturedPostsAsync()
     {
         return await _context.Posts
@@ -94,11 +112,15 @@ public class PostService : IPostService
 
     public async Task<List<Post>> GetBreakingPostsAsync()
     {
+        var now = DateTime.UtcNow;
+
         return await _context.Posts
             .Include(x => x.ContentBlocks)
             .Where(x =>
                 x.Status == PostStatus.Published &&
-                x.IsBreaking)
+                x.IsBreaking &&
+                x.BreakingUntil.HasValue &&
+                x.BreakingUntil.Value > now)
             .OrderByDescending(x => x.PublishedAt)
             .Take(5)
             .ToListAsync();
@@ -133,7 +155,37 @@ public class PostService : IPostService
 
         post.IsTrending = dto.IsTrending;
 
-        post.IsBreaking = dto.IsBreaking;
+        if (!dto.IsBreaking)
+        {
+            post.IsBreaking = false;
+            post.BreakingUntil = null;
+        }
+        else
+        {
+            post.IsBreaking = true;
+
+            // Only reset the expiry if a new duration was selected.
+            if (dto.BreakingDurationHours.HasValue)
+            {
+                if (!new[] { 2, 4, 12, 24 }.Contains(dto.BreakingDurationHours.Value))
+                {
+                    throw new ArgumentException(
+                        "Breaking duration must be 2, 4, 12, or 24 hours."
+                    );
+                }
+
+                post.BreakingUntil = DateTime.UtcNow.AddHours(
+                    dto.BreakingDurationHours.Value
+                );
+            }
+            else if (!post.BreakingUntil.HasValue ||
+                    post.BreakingUntil.Value <= DateTime.UtcNow)
+            {
+                // Re-enable an expired breaking label using the default.
+                post.BreakingUntil = DateTime.UtcNow.AddHours(4);
+            }
+        }
+
         if (dto.Status == PostStatus.Published &&
             post.PublishedAt == null)
         {

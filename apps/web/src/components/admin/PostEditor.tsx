@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   ImagePlus,
@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { uploadImage } from "@/src/features/auth/services/upload.service";
 import { createPost } from "@/src/features/auth/services/auth.service";
-import type { ContentBlock } from "@/src/features/auth/types/post.types";
 import { toast } from "sonner";
 
 type BlockType =
@@ -40,6 +39,11 @@ export default function PostEditor() {
 
   const [category, setCategory] =
     useState("Politics");
+
+  const [isBreaking, setIsBreaking] = useState(false);
+
+  const [breakingDurationHours, setBreakingDurationHours] =
+    useState(4);
 
   const [seoTitle, setSeoTitle] =
     useState("");
@@ -132,18 +136,18 @@ export default function PostEditor() {
     =========================
   */
 
-const updateBlock = (id: number, value: string) => {
-  setBlocks((prev) =>
-    prev.map((block) =>
-      block.id === id
-        ? {
-            ...block,
-            content: value,
-          }
-        : block
-    )
-  );
-};
+  const updateBlock = (id: number, value: string) => {
+    setBlocks((prev) =>
+      prev.map((block) =>
+        block.id === id
+          ? {
+              ...block,
+              content: value,
+            }
+          : block
+      )
+    );
+  };
 
   /*
     =========================
@@ -196,6 +200,26 @@ const updateBlock = (id: number, value: string) => {
  /* New fix */
 
   const handleSubmit = async () => {
+    if (!title.trim()) {
+      toast.error("Please enter an article title.");
+      return;
+    }
+
+    if (!excerpt.trim()) {
+      toast.error("Please enter an article excerpt.");
+      return;
+    }
+
+    if (!featuredImage) {
+      toast.error("Please upload a featured image.");
+      return;
+    }
+
+    if (!blocks.some((block) => block.content.trim())) {
+      toast.error("Please add article content.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -216,11 +240,15 @@ const updateBlock = (id: number, value: string) => {
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
-      status: "published" as const
+      status: "published" as const,
+      isBreaking,
+      breakingDurationHours: isBreaking
+        ? breakingDurationHours
+        : null,
     };
       await createPost(payload);
 
-      alert("Post published!");
+      toast.success("Post published successfully!");
 
       /*
         RESET
@@ -232,7 +260,9 @@ const updateBlock = (id: number, value: string) => {
       setSeoTitle("");
       setSeoDescription("");
       setTags("");
-
+      setFeaturedImage("");
+      setIsBreaking(false);
+      setBreakingDurationHours(4);
       setBlocks([
         {
           id: 1,
@@ -245,13 +275,24 @@ const updateBlock = (id: number, value: string) => {
     } catch (error) {
       console.error(error);
 
-      alert(
-        "Failed to publish article"
-      );
+      toast.error("Failed to publish article", {
+        description: "Please check your details and try again.",
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  // Preview image URL for display
+
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -363,6 +404,56 @@ const updateBlock = (id: number, value: string) => {
                 Entertainment
               </option>
             </select>
+          </div>
+
+          {/* BREAKING NEWS SETTINGS */}
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 space-y-4">
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="font-bold text-red-700">
+                  Breaking News
+                </h3>
+
+                <p className="mt-1 text-sm text-gray-600">
+                  Temporarily display this article in the breaking-news ticker.
+                </p>
+              </div>
+
+              <input
+                type="checkbox"
+                checked={isBreaking}
+                onChange={(e) => setIsBreaking(e.target.checked)}
+                className="h-5 w-5 accent-red-600"
+              />
+            </div>
+
+            {isBreaking && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Breaking News duration
+                </label>
+
+                <select
+                  value={breakingDurationHours}
+                  onChange={(e) =>
+                    setBreakingDurationHours(Number(e.target.value))
+                  }
+                  className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 outline-none focus:border-red-500"
+                >
+                  <option value={2}>2 hours</option>
+                  <option value={4}>4 hours (Recommended)</option>
+                  <option value={12}>12 hours</option>
+                  <option value={24}>24 hours</option>
+                </select>
+
+                <p className="mt-2 text-xs text-gray-500">
+                  The article will automatically leave the breaking-news ticker after this period.
+                  It will remain in its selected category.
+                </p>
+              </div>
+            )}
+
           </div>
 
           {/* SEO */}

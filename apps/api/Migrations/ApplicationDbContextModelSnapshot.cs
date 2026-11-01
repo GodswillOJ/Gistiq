@@ -56,6 +56,9 @@ namespace api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("BreakingUntil")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(120)

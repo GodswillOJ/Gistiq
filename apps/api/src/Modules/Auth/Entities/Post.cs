@@ -49,6 +49,9 @@ public class Post
     public bool IsTrending { get; set; } = false;
 
     public bool IsBreaking { get; set; } = false;
+
+    public DateTime? BreakingUntil { get; set; }
+
     public bool IsFeatured { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

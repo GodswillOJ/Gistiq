@@ -80,4 +80,6 @@ public class CreatePostDto
     public bool IsTrending { get; set; }
 
     public bool IsBreaking { get; set; }
+    
+    public int? BreakingDurationHours { get; set; }
 }

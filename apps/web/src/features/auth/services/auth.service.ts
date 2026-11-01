@@ -41,6 +41,11 @@ export const getPost = async (id: string) => {
   return response.data;
 };
 
+export const getBreakingPosts = async () => {
+  const response = await axios.get(`${API}/posts/breaking`);
+  return response.data;
+};
+
 export const updatePost = async (
   id: string,
   data: CreatePostPayload

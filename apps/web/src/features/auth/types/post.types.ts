@@ -11,6 +11,10 @@ export interface Post {
   subtitle: string;
   excerpt: string;
   featuredImage: string;
+  isBreaking?: boolean;
+  breakingUntil?: string | null;
+  isTrending?: boolean;
+  isFeatured?: boolean;
   category: string;
   seoTitle: string;
   seoDescription: string;
@@ -27,6 +31,10 @@ export interface CreatePostPayload {
   subtitle: string;
   excerpt: string;
   featuredImage: string;
+  isBreaking?: boolean;
+  breakingDurationHours?: number | null;
+  isTrending?: boolean;
+  isFeatured?: boolean;
   category: string;
   contentBlocks: ContentBlock[];
   seoTitle: string;
