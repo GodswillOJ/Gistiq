@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -14,92 +15,114 @@ import PostCard from "./PostCard";
 import CategoryFilter from "./CategoryFilter";
 
 export default function LatestArticles() {
-
-  const [posts, setPosts] =
-    useState<Post[]>([]);
-
-  const [activeCategory, setActiveCategory] =
-    useState("All");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadPosts =
-      async () => {
-        const data =
-          await getPosts();
-
+    const loadPosts = async () => {
+      try {
+        const data = await getPosts();
         setPosts(data);
-      };
+      } catch (err) {
+        console.error("Failed to load posts:", err);
+        setError("Unable to load articles. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     loadPosts();
   }, []);
 
-  const categories =
-    useMemo(() => {
-      return [
-        ...new Set(
-          posts.map(
-            (x) =>
-              x.category
-          )
-        ),
-      ];
-    }, [posts]);
+  const categories = useMemo(() => {
+    return [
+      ...new Set(posts.map((post) => post.category)),
+    ];
+  }, [posts]);
 
-  const filteredPosts =
-    useMemo(() => {
-      if (
-        activeCategory ===
-        "All"
-      ) {
-        return posts;
-      }
+  const filteredPosts = useMemo(() => {
+    if (activeCategory === "All") {
+      return posts;
+    }
 
-      return posts.filter(
-        (post) =>
-          post.category ===
-          activeCategory
-      );
-    }, [
-      posts,
-      activeCategory,
-    ]);
+    return posts.filter(
+      (post) => post.category === activeCategory
+    );
+  }, [posts, activeCategory]);
 
   return (
-    <section className="px-6 py-16 max-w-6xl mx-auto">
+    <section className="w-full px-5 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto">
 
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+        {/* SECTION HEADER */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
 
-        <h2 className="text-4xl font-black">
-           Top Stories
-        </h2>
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-black text-black">
+              Latest Posts
+            </h2>
 
-        <CategoryFilter
-          categories={
-            categories
-          }
-          active={
-            activeCategory
-          }
-          onChange={
-            setActiveCategory
-          }
-        />
+            <p className="mt-2 text-gray-500">
+              Discover the latest stories and updates.
+            </p>
+          </div>
 
-      </div>
+          <CategoryFilter
+            categories={categories}
+            active={activeCategory}
+            onChange={setActiveCategory}
+          />
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+        </div>
 
-        {filteredPosts.map(
-          (post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-            />
-          )
+        {/* LOADING */}
+        {loading && (
+          <div className="py-16 text-center text-gray-500">
+            Loading latest articles...
+          </div>
+        )}
+
+        {/* ERROR */}
+        {!loading && error && (
+          <div className="py-16 text-center text-red-500">
+            {error}
+          </div>
+        )}
+
+        {/* ARTICLES GRID */}
+        {!loading && !error && filteredPosts.length > 0 && (
+          <div
+            className="grid gap-6 lg:gap-8"
+            style={{
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            }}
+          >
+            {filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* EMPTY STATE */}
+        {!loading && !error && filteredPosts.length === 0 && (
+          <div className="py-16 text-center rounded-3xl bg-gray-50">
+            <h3 className="text-xl font-bold text-gray-800">
+              No articles found
+            </h3>
+
+            <p className="mt-2 text-gray-500">
+              There are currently no posts in this category.
+            </p>
+          </div>
         )}
 
       </div>
-
     </section>
   );
 }

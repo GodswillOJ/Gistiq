@@ -1,18 +1,18 @@
 export const navLinks = [
   {
     name: "News",
-    href: "/category/news",
+    href: "#/category/news",
   },
   {
     name: "Technology",
-    href: "/category/technology",
+    href: "#/category/technology",
   },
   {
     name: "Culture",
-    href: "/category/culture",
+    href: "#/category/culture",
   },
   {
     name: "Sports",
-    href: "/category/sports",
+    href: "#/category/sports",
   },
 ];

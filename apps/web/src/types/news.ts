@@ -1,7 +1,17 @@
+export interface BreakingNewsResponse {
+  id: string;
+  title: string;
+  category: string;
+  featuredImage: string;
+  excerpt: string;
+  slug: string;
+}
+
 export interface NewsPost {
-    id: number;
-    title: string;
-    category: string;
-    image: string;
-    excerpt: string;
+  id: string;
+  title: string;
+  category: string;
+  image: string;
+  excerpt: string;
+  slug: string;
 }

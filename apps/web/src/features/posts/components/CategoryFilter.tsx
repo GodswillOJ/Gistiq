@@ -1,9 +1,8 @@
+
 interface Props {
   categories: string[];
   active: string;
-  onChange: (
-    category: string
-  ) => void;
+  onChange: (category: string) => void;
 }
 
 export default function CategoryFilter({
@@ -11,40 +10,31 @@ export default function CategoryFilter({
   active,
   onChange,
 }: Props) {
+  const buttonStyle = (category: string) =>
+    `shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition ${
+      active === category
+        ? "bg-black text-white"
+        : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+    }`;
+
   return (
     <div className="flex flex-wrap gap-3">
-
       <button
-        onClick={() =>
-          onChange("All")
-        }
-        className={`px-5 py-2 rounded-full transition ${
-          active === "All"
-            ? "bg-black text-white"
-            : "bg-white border-zinc-300 shadow-sm"
-        }`}
+        onClick={() => onChange("All")}
+        className={buttonStyle("All")}
       >
         All
       </button>
 
-      {categories.map(
-        (category) => (
-          <button
-            key={category}
-            onClick={() =>
-              onChange(category)
-            }
-            className={`px-5 py-2 rounded-full transition ${
-              active === category
-                ? "bg-black text-white"
-                : "bg-white border border-zinc-700"
-            }`}
-          >
-            {category}
-          </button>
-        )
-      )}
-
+      {categories.map((category) => (
+        <button
+          key={category}
+          onClick={() => onChange(category)}
+          className={buttonStyle(category)}
+        >
+          {category}
+        </button>
+      ))}
     </div>
   );
 }

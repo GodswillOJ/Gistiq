@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { DemoNewsProvider } from "@/src/context/DemoNewsContext";
+import { BreakingNewsProvider } from "@/src/context/BreakingNewsContext";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <DemoNewsProvider>
+        <BreakingNewsProvider>
           {children}
           <Toaster
             position="top-right"
@@ -64,7 +64,7 @@ export default function RootLayout({
                 "bg-white text-black border border-gray-200 shadow-xl rounded-2xl",
             }}
           />
-        </DemoNewsProvider>
+        </BreakingNewsProvider>
       </body>
     </html>
   );
