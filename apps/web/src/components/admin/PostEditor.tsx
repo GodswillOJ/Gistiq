@@ -445,6 +445,7 @@ export default function PostEditor() {
                   <option value={4}>4 hours (Recommended)</option>
                   <option value={12}>12 hours</option>
                   <option value={24}>24 hours</option>
+                  <option value={68}>68 hours</option>
                 </select>
 
                 <p className="mt-2 text-xs text-gray-500">

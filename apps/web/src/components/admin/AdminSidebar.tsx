@@ -133,7 +133,9 @@ export default function AdminSidebar() {
 
           <div>
             <h2 className="text-2xl font-black">
-              AfroCry
+              <Link href="/">
+                AfroCry
+              </Link>
             </h2>
 
             <p className="text-xs text-gray-500">

@@ -18,10 +18,10 @@ public class PostService : IPostService
     public async Task<Post> CreatePostAsync(CreatePostDto dto, ClaimsPrincipal user)
     {
         if (dto.BreakingDurationHours.HasValue &&
-            !new[] { 2, 4, 12, 24 }.Contains(dto.BreakingDurationHours.Value))
+            !new[] { 2, 4, 12, 24, 68 }.Contains(dto.BreakingDurationHours.Value))
         {
             throw new ArgumentException(
-                "Breaking duration must be 2, 4, 12, or 24 hours."
+                "Breaking duration must be 2, 4, 12, 24, or 68 hours."
             );
         }
 
@@ -167,10 +167,10 @@ public class PostService : IPostService
             // Only reset the expiry if a new duration was selected.
             if (dto.BreakingDurationHours.HasValue)
             {
-                if (!new[] { 2, 4, 12, 24 }.Contains(dto.BreakingDurationHours.Value))
+                if (!new[] { 2, 4, 12, 24, 68 }.Contains(dto.BreakingDurationHours.Value))
                 {
                     throw new ArgumentException(
-                        "Breaking duration must be 2, 4, 12, or 24 hours."
+                        "Breaking duration must be 2, 4, 12, 24, or 68 hours."
                     );
                 }
 
