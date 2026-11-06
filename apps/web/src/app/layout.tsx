@@ -4,7 +4,7 @@ import { BreakingNewsProvider } from "@/src/context/BreakingNewsContext";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://afrocrymedia.com"),
+  metadataBase: new URL("https://afrocry.vercel.app"),
 
   title: {
     default: "AfroCry Media",

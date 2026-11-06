@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/api"],
       },
     ],
-    sitemap: "https://afrocrymedia.com/sitemap.xml",
+    sitemap: "https://afrocry.vercel.app/sitemap.xml",
   };
 }

@@ -7,7 +7,7 @@ import {
   Post,
   ContentBlock,
 } from "@/src/features/auth/types/post.types";
-
+import FacebookShareButton from "@/src/features/posts/components/FacebookShareButton";
 import Link from "next/link";
 import { Metadata } from "next";
 import Footer from "@/src/components/footer/Footer";
@@ -30,22 +30,26 @@ export async function generateMetadata({
     };
   }
 
+  const articleUrl = `https://gistiq.vercel.app/news/${post.slug}`;
+
   return {
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt,
 
     alternates: {
-      canonical: `/news/${post.slug}`,
+      canonical: articleUrl,
     },
 
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      url: `https://afrocrymedia.com/news/${post.slug}`,
-      siteName: "AfroCry Media",
+      url: articleUrl,
+      siteName: "Gistiq",
       images: [
         {
           url: post.featuredImage,
+          width: 1200,
+          height: 630,
           alt: post.title,
         },
       ],
@@ -241,7 +245,14 @@ export default async function ArticlePage({
                   </li>
                 </ol>
               </nav>
-
+              
+              {/* Share to facebook */}
+              <div className="mb-6 flex flex-wrap items-center gap-3">
+                <FacebookShareButton
+                  url={`https://afrocry.vercel.app/news/${post.slug}`}
+                />
+              </div>
+              
               {/* ARTICLE CONTENT */}
               <div className="article-content min-w-0">
 

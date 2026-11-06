@@ -110,7 +110,7 @@ export default function UserMenu() {
           {/* LINKS */}
           <div className="py-2">
             <Link
-              href="/newsletter"
+              href="#/newsletter"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >
@@ -118,7 +118,7 @@ export default function UserMenu() {
             </Link>
 
             <Link
-              href="/settings"
+              href="#/settings"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
             >

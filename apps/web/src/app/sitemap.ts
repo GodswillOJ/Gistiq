@@ -4,7 +4,7 @@ import { getPosts } from "@/src/features/auth/services/auth.service";
 import { Post } from "@/src/features/auth/types/post.types";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://afrocrymedia.com";
+  const baseUrl = "https://afrocry.vercel.app";
 
   const staticPages: MetadataRoute.Sitemap = [
     {
