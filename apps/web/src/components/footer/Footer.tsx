@@ -176,7 +176,7 @@ export default function Footer() {
             <span>
               Created by{" "}
               <span className="font-medium text-gray-900">
-                Godswill Ogono
+                AfroCry Media Team
               </span>
             </span>
           </div>
