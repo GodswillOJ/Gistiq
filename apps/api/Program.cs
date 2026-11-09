@@ -52,7 +52,7 @@ builder.Services.AddCors(options =>
 {
     var allowedOrigins = (
         Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
-        ?? "http://localhost:3000"
+        ?? "https://afrocry.vercel.app"
     ).Split(
         ',',
         StringSplitOptions.RemoveEmptyEntries |
