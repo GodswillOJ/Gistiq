@@ -188,6 +188,7 @@ export default function Footer() {
             href="mailto:godswill.ogono@gmail.com"
             className="transition hover:text-gray-900"
           >
+            // new
             godswill.ogono@gmail.com
           </a>
         </div> */}
