@@ -28,7 +28,7 @@ export const logoutUser = () => {
 
 // Existing post functions remain unchanged
 export const createPost = async (data: CreatePostPayload) => {
-  return axios.post(`${API}/posts`, data, config);
+  return axios.post("/api/posts", data);
 };
 
 export const getPosts = async () => {
